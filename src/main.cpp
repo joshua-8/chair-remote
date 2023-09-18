@@ -2,23 +2,23 @@
 #include <Arduino.h>
 #include <JMotor.h>
 
-JMotorDriverEsp32Servo servoDriver1 = JMotorDriverEsp32Servo(0, 32);
+JMotorDriverEsp32Servo servoDriver1 = JMotorDriverEsp32Servo(0, 27);
 JServoControllerAdvanced servoController1 = JServoControllerAdvanced(servoDriver1);
-JServoCurrentSensor<7> servoCurrentSensor1 = JServoCurrentSensor<7>(34, 500, 50);
-JServoControllerGentle servo1 = JServoControllerGentle(servoController1, servoCurrentSensor1);
-ChairSwitchPusher pusher1 = ChairSwitchPusher(servo1);
+JServoCurrentSensor<7> servoCurrentSensor1 = JServoCurrentSensor<7>(12, 500, 50);
+JServoControllerGentle servo1 = JServoControllerGentle(servoController1, servoCurrentSensor1, 0.4, 45);
+ChairSwitchPusher pusher1 = ChairSwitchPusher(servo1, true);
 
 JMotorDriverEsp32Servo servoDriver2 = JMotorDriverEsp32Servo(1, 26);
 JServoControllerAdvanced servoController2 = JServoControllerAdvanced(servoDriver2);
 JServoCurrentSensor<7> servoCurrentSensor2 = JServoCurrentSensor<7>(33, 500, 50);
-JServoControllerGentle servo2 = JServoControllerGentle(servoController2, servoCurrentSensor2);
-ChairSwitchPusher pusher2 = ChairSwitchPusher(servo2);
+JServoControllerGentle servo2 = JServoControllerGentle(servoController2, servoCurrentSensor2, 0.4, 45);
+ChairSwitchPusher pusher2 = ChairSwitchPusher(servo2, false);
 
-JMotorDriverEsp32Servo servoDriver3 = JMotorDriverEsp32Servo(2, 27);
+JMotorDriverEsp32Servo servoDriver3 = JMotorDriverEsp32Servo(2, 32);
 JServoControllerAdvanced servoController3 = JServoControllerAdvanced(servoDriver3);
-JServoCurrentSensor<7> servoCurrentSensor3 = JServoCurrentSensor<7>(12, 500, 50);
-JServoControllerGentle servo3 = JServoControllerGentle(servoController3, servoCurrentSensor3);
-ChairSwitchPusher pusher3 = ChairSwitchPusher(servo3);
+JServoCurrentSensor<7> servoCurrentSensor3 = JServoCurrentSensor<7>(34, 500, 50);
+JServoControllerGentle servo3 = JServoControllerGentle(servoController3, servoCurrentSensor3, 0.4, 45);
+ChairSwitchPusher pusher3 = ChairSwitchPusher(servo3, true);
 
 const byte numPushers = 3;
 ChairSwitchPusher pushers[numPushers] = { pusher1, pusher2, pusher3 };
@@ -33,7 +33,7 @@ void setup()
     }
 
     servo1.setAngleImmediate(0);
-    servo1.setSetAngles(-90, 90);
+    servo1.setSetAngles(-85, 105);
     servo1.enable();
     servo1.setVelAccelLimits(180, 180);
     servo1.setAngleLimits(-40, 40);
@@ -49,13 +49,11 @@ void setup()
     servo3.enable();
     servo3.setVelAccelLimits(180, 180);
     servo3.setAngleLimits(-40, 40);
-
-    Serial.begin(9600);
 }
 
 void loop()
 {
-    if (digitalRead(0) == LOW) {
+    if (digitalRead(0) == LOW) { // brute force mode (run servos directly to their angle limits)
         for (byte i = 0; i < numPushers; i++) {
             pushers[i].simple = true;
         }
@@ -73,6 +71,7 @@ void loop()
                 pushers[i].pushR();
             }
         }
+
         pushers[i].run();
     }
 }
